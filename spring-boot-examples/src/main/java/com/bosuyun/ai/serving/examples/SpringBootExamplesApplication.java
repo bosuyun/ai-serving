@@ -1,16 +1,13 @@
-package com.bosuyun.ai.serving;
+package com.bosuyun.ai.serving.examples;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * @author jerrylau
- */
 @SpringBootApplication
-public class BosuyunAiServingApplication {
+public class SpringBootExamplesApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(BosuyunAiServingApplication.class, args);
+        SpringApplication.run(SpringBootExamplesApplication.class, args);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.example.springbootexamples;
+package com.bosuyun.ai.serving.examples;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
