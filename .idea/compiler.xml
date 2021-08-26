@@ -14,7 +14,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="bosuyun-ai-dependencies" target="11" />
-      <module name="bosuyun-ai-serving" target="11" />
+      <module name="bosuyun-ai-serving" target="1.5" />
       <module name="spring-boot-examples" target="11" />
       <module name="spring-boot-starter-ai-serving" target="11" />
     </bytecodeTargetLevel>

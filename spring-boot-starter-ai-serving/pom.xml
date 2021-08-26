@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.bosuyun.ai</groupId>
-    <artifactId>serving</artifactId>
+    <artifactId>spring-boot-stater-ai-serving</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>spring-boot-starter-ai-serving</name>
     <description>Demo project for Spring Boot</description>
