@@ -24,4 +24,4 @@ dist/
 nbdist/
 .nb-gradle/
 
-spring-boot-examples/src/main/resources/models
+models/
