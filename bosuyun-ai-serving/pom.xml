@@ -13,13 +13,15 @@
     <name>bosuyun-ai-serving</name>
     <description>AI Serving</description>
     <properties>
-        <java.version>11</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>1.8</java.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.bosuyun</groupId>
-                <artifactId>bosuyun-ai-dependencies</artifactId>
+                <groupId>org.bosuyun.ai</groupId>
+                <artifactId>ai-dependencies</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
@@ -27,6 +29,14 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.microsoft.onnxruntime</groupId>-->
+<!--            <artifactId>onnxruntime_gpu</artifactId>-->
+<!--        </dependency>-->
     </dependencies>
 </project>
