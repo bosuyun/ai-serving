@@ -11,6 +11,6 @@ public class GetStartedTest {
 
     @Test
     void test(){
-
+        System.out.println("tst");
     }
 }

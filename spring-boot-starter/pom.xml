@@ -8,12 +8,13 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath> <!-- lookup parent from repository -->
     </parent>
-    <artifactId>spring-boot-stater-ai-serving</artifactId>
+    <artifactId>spring-boot-starter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-boot-starter-ai-serving</name>
     <description>Demo project for Spring Boot</description>
+    <packaging>pom</packaging>
     <properties>
         <java.version>1.8</java.version>
+        <skipTests>true</skipTests>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -37,7 +38,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -46,5 +46,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

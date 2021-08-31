@@ -20,17 +20,18 @@ import java.util.regex.Pattern;
 public class ScoreMNIST {
 
     public static void main(String[] args) throws OrtException, IOException {
-        if (args.length < 2 || args.length > 3) {
-            System.out.println("Usage: ScoreMNIST <model-path> <test-data> <optional:scikit-learn-flag>");
-            System.out.println("The test data input should be a libsvm format version of MNIST.");
-            return;
-        }
-        String modelPath = args[0];
+//        if (args.length < 2 || args.length > 3) {
+//            System.out.println("Usage: ScoreMNIST <model-path> <test-data> <optional:scikit-learn-flag>");
+//            System.out.println("The test data input should be a libsvm format version of MNIST.");
+//            return;
+//        }
+        String modelPath = "/Users/jerrylau/workspace/bosuyun/Projects/ai-serving/models/vision/classification/mnist/model/mnist-8.onnx";
+        String testDataPath = "/Users/jerrylau/workspace/bosuyun/Projects/ai-serving/bosuyun-ai-serving/src/test/resources/testdata/cnn_mnist_pytorch.onnx";
         try (OrtEnvironment env = OrtEnvironment.getEnvironment();
              OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
             opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.BASIC_OPT);
-            logger.info("Loading model from " + args[0]);
-            try (OrtSession session = env.createSession(args[0], opts)) {
+            logger.info("Loading model from " + modelPath);
+            try (OrtSession session = env.createSession(modelPath, opts)) {
 
                 logger.info("Inputs:");
                 for (NodeInfo i : session.getInputInfo().values()) {
@@ -42,7 +43,7 @@ public class ScoreMNIST {
                     logger.info(i.toString());
                 }
 
-                SparseData data = load(args[1]);
+                SparseData data = load(testDataPath);
 
                 float[][][][] testData = new float[1][1][28][28];
                 float[][] testDataSKL = new float[1][780];
