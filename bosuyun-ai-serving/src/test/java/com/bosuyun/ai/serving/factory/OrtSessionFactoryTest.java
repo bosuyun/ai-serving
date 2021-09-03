@@ -3,26 +3,29 @@ package com.bosuyun.ai.serving.factory;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
+import com.bosuyun.ai.serving.utils.ResourceUtils;
 import org.junit.jupiter.api.Test;
 
 class OrtSessionFactoryTest {
 
     @Test
     void test() {
-        System.out.println(System.getProperty("user.dir"));
-        System.out.println(System.getProperty("os.name", "generic"));
         OrtEnvironment env = OrtEnvironment.getEnvironment();
+        OrtSession session;
+        String modelPath = ResourceUtils.getPath("mnist-8.onnx");
         try {
-            env.createSession("mnist-8.onnx", new OrtSession.SessionOptions());
+            session = env.createSession(modelPath, new OrtSession.SessionOptions());
+            System.out.println(session.getInputInfo());
+
         } catch (OrtException e) {
             e.printStackTrace();
         }
+
+//        OnnxTensor t1, t2;
+//        var inputs = Map.of("name1", t1, "name2", t2);
+//        try (var results = session.run(inputs)) {
+//            // manipulate the results
+//        }
     }
 
-    @Test
-    void getSession() throws OrtException {
-        OrtSession ortSession = OrtSessionFactory.getCpuSession("mnist-8.onnx",
-                new OrtSession.SessionOptions());
-        System.out.println(ortSession.getInputInfo());
-    }
 }

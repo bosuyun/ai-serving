@@ -16,7 +16,6 @@
         <module>bosuyun-ai-dependencies</module>
         <module>bosuyun-ai-serving</module>
         <module>spring-boot-examples</module>
-        <module>spring-boot-starter</module>
     </modules>
 
 </project>

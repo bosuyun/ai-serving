@@ -1,6 +1,8 @@
 package com.bosuyun.ai.serving.sample;
 
+
 import ai.onnxruntime.*;
+import com.bosuyun.ai.serving.utils.ResourceUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -13,113 +15,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-
 /**
  * Created by liuyuancheng on 2021/8/27  <br/>
  */
 public class ScoreMNIST {
 
-    public static void main(String[] args) throws OrtException, IOException {
-//        if (args.length < 2 || args.length > 3) {
-//            System.out.println("Usage: ScoreMNIST <model-path> <test-data> <optional:scikit-learn-flag>");
-//            System.out.println("The test data input should be a libsvm format version of MNIST.");
-//            return;
-//        }
-        String modelPath = "/Users/jerrylau/workspace/bosuyun/Projects/ai-serving/models/vision/classification/mnist/model/mnist-8.onnx";
-        String testDataPath = "/Users/jerrylau/workspace/bosuyun/Projects/ai-serving/bosuyun-ai-serving/src/test/resources/testdata/cnn_mnist_pytorch.onnx";
-        try (OrtEnvironment env = OrtEnvironment.getEnvironment();
-             OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
-            opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.BASIC_OPT);
-            logger.info("Loading model from " + modelPath);
-            try (OrtSession session = env.createSession(modelPath, opts)) {
-
-                logger.info("Inputs:");
-                for (NodeInfo i : session.getInputInfo().values()) {
-                    logger.info(i.toString());
-                }
-
-                logger.info("Outputs:");
-                for (NodeInfo i : session.getOutputInfo().values()) {
-                    logger.info(i.toString());
-                }
-
-                SparseData data = load(testDataPath);
-
-                float[][][][] testData = new float[1][1][28][28];
-                float[][] testDataSKL = new float[1][780];
-
-                int correctCount = 0;
-                int[][] confusionMatrix = new int[10][10];
-
-                String inputName = session.getInputNames().iterator().next();
-
-                for (int i = 0; i < data.labels.length; i++) {
-                    if (args.length == 3) {
-                        writeDataSKL(testDataSKL, data.indices.get(i), data.values.get(i));
-                    } else {
-                        writeData(testData, data.indices.get(i), data.values.get(i));
-                    }
-
-                    try (OnnxTensor test =
-                                 OnnxTensor.createTensor(env, args.length == 3 ? testDataSKL : testData);
-                         OrtSession.Result output = session.run(Collections.singletonMap(inputName, test))) {
-
-                        int predLabel;
-
-                        if (args.length == 3) {
-                            long[] labels = (long[]) output.get(0).getValue();
-                            predLabel = (int) labels[0];
-                        } else {
-                            float[][] outputProbs = (float[][]) output.get(0).getValue();
-                            predLabel = pred(outputProbs[0]);
-                        }
-                        if (predLabel == data.labels[i]) {
-                            correctCount++;
-                        }
-
-                        confusionMatrix[data.labels[i]][predLabel]++;
-
-                        if (i % 2000 == 0) {
-                            logger.log(Level.INFO, "Cur accuracy = " + ((float) correctCount) / (i + 1));
-                            logger.log(Level.INFO, "Output type = " + output.get(0).toString());
-                            if (args.length == 3) {
-                                logger.log(Level.INFO, "Output type = " + output.get(1).toString());
-                                logger.log(Level.INFO, "Output value = " + output.get(1).getValue().toString());
-                            }
-                        }
-                    }
-                }
-
-                logger.info("Final accuracy = " + ((float) correctCount) / data.labels.length);
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("Label");
-                for (int i = 0; i < confusionMatrix.length; i++) {
-                    sb.append(String.format("%1$5s", "" + i));
-                }
-                sb.append("\n");
-
-                for (int i = 0; i < confusionMatrix.length; i++) {
-                    sb.append(String.format("%1$5s", "" + i));
-                    for (int j = 0; j < confusionMatrix[i].length; j++) {
-                        sb.append(String.format("%1$5s", "" + confusionMatrix[i][j]));
-                    }
-                    sb.append("\n");
-                }
-
-                System.out.println(sb.toString());
-            }
-        }
-
-        logger.info("Done!");
-    }
-
-
     private static final Logger logger = Logger.getLogger(ScoreMNIST.class.getName());
-    /** Pattern for splitting libsvm format files. */
+    /**
+     * Pattern for splitting libsvm format files.
+     */
     private static final Pattern splitPattern = Pattern.compile("\\s+");
 
-    /** A named tuple for sparse classification data. */
+    /**
+     * A named tuple for sparse classification data.
+     */
     private static class SparseData {
         public final int[] labels;
         public final List<int[]> indices;
@@ -277,9 +186,9 @@ public class ScoreMNIST {
     /**
      * Writes out sparse data into the last two dimensions of the supplied 4d array.
      *
-     * @param data The 4d array to write to.
+     * @param data    The 4d array to write to.
      * @param indices The indices of the sparse data.
-     * @param values The values of the sparse data.
+     * @param values  The values of the sparse data.
      */
     public static void writeData(float[][][][] data, int[] indices, float[] values) {
         zeroData(data);
@@ -312,9 +221,9 @@ public class ScoreMNIST {
     /**
      * Writes out sparse data to the last dimension of the supplied 2d array.
      *
-     * @param data The 2d array to write to.
+     * @param data    The 2d array to write to.
      * @param indices The indices of the sparse data.
-     * @param values THe values of the sparse data.
+     * @param values  THe values of the sparse data.
      */
     public static void writeDataSKL(float[][] data, int[] indices, float[] values) {
         zeroDataSKL(data);
@@ -340,5 +249,101 @@ public class ScoreMNIST {
             }
         }
         return idx;
+    }
+
+    public static void main(String[] args) throws OrtException, IOException {
+        args = new String[2];
+        args[0] = ResourceUtils.getPath("mnist-8.onnx");
+        args[1] = ResourceUtils.getPath("mnist-8.t.bz2");
+        if (args.length < 2 || args.length > 3) {
+            System.out.println("Usage: ScoreMNIST <model-path> <test-data> <optional:scikit-learn-flag>");
+            System.out.println("The test data input should be a libsvm format version of MNIST.");
+            return;
+        }
+
+        try (OrtEnvironment env = OrtEnvironment.getEnvironment();
+             OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
+            opts.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.BASIC_OPT);
+            logger.info("Loading model from " + args[0]);
+            try (OrtSession session = env.createSession(args[0], opts)) {
+                logger.info("Inputs:");
+                for (NodeInfo i : session.getInputInfo().values()) {
+                    logger.info(i.toString());
+                }
+
+                logger.info("Outputs:");
+                for (NodeInfo i : session.getOutputInfo().values()) {
+                    logger.info(i.toString());
+                }
+
+                SparseData data = load(args[1]);
+
+                float[][][][] testData = new float[1][1][28][28];
+                float[][] testDataSKL = new float[1][780];
+
+                int correctCount = 0;
+                int[][] confusionMatrix = new int[10][10];
+
+                String inputName = session.getInputNames().iterator().next();
+
+                for (int i = 0; i < data.labels.length; i++) {
+                    if (args.length == 3) {
+                        writeDataSKL(testDataSKL, data.indices.get(i), data.values.get(i));
+                    } else {
+                        writeData(testData, data.indices.get(i), data.values.get(i));
+                    }
+
+                    try (OnnxTensor test =
+                                 OnnxTensor.createTensor(env, args.length == 3 ? testDataSKL : testData);
+                         OrtSession.Result output = session.run(Collections.singletonMap(inputName, test))) {
+
+                        int predLabel;
+
+                        if (args.length == 3) {
+                            long[] labels = (long[]) output.get(0).getValue();
+                            predLabel = (int) labels[0];
+                        } else {
+                            float[][] outputProbs = (float[][]) output.get(0).getValue();
+                            predLabel = pred(outputProbs[0]);
+                        }
+                        if (predLabel == data.labels[i]) {
+                            correctCount++;
+                        }
+
+                        confusionMatrix[data.labels[i]][predLabel]++;
+
+                        if (i % 2000 == 0) {
+                            logger.log(Level.INFO, "Cur accuracy = " + ((float) correctCount) / (i + 1));
+                            logger.log(Level.INFO, "Output type = " + output.get(0).toString());
+                            if (args.length == 3) {
+                                logger.log(Level.INFO, "Output type = " + output.get(1).toString());
+                                logger.log(Level.INFO, "Output value = " + output.get(1).getValue().toString());
+                            }
+                        }
+                    }
+                }
+
+                logger.info("Final accuracy = " + ((float) correctCount) / data.labels.length);
+
+                StringBuilder sb = new StringBuilder();
+                sb.append("Label");
+                for (int i = 0; i < confusionMatrix.length; i++) {
+                    sb.append(String.format("%1$5s", "" + i));
+                }
+                sb.append("\n");
+
+                for (int i = 0; i < confusionMatrix.length; i++) {
+                    sb.append(String.format("%1$5s", "" + i));
+                    for (int j = 0; j < confusionMatrix[i].length; j++) {
+                        sb.append(String.format("%1$5s", "" + confusionMatrix[i][j]));
+                    }
+                    sb.append("\n");
+                }
+
+                System.out.println(sb.toString());
+            }
+        }
+
+        logger.info("Done!");
     }
 }
